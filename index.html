@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Hora del Te</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --bg: var(--tg-theme-bg-color, #ffffff);
+    --bg2: var(--tg-theme-secondary-bg-color, #f2f2f7);
+    --txt: var(--tg-theme-text-color, #000000);
+    --hint: var(--tg-theme-hint-color, #6d6d72);
+    --link: var(--tg-theme-link-color, #2481cc);
+    --btn: var(--tg-theme-button-color, #2481cc);
+    --btntxt: var(--tg-theme-button-text-color, #ffffff);
+    --card: var(--tg-theme-section-bg-color, var(--bg));
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg: var(--tg-theme-bg-color,#1c1c1e); --bg2: var(--tg-theme-secondary-bg-color,#000);
+      --txt: var(--tg-theme-text-color,#fff); --hint: var(--tg-theme-hint-color,#8e8e93);
+      --card: var(--tg-theme-section-bg-color,#1c1c1e); }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg2);color:var(--txt);
+    font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:16px 14px calc(24px + env(safe-area-inset-bottom));}
+  h1{font-size:26px;margin:4px 2px 2px}
+  .sub{color:var(--hint);font-size:14px;margin:0 2px 16px}
+  .filtros{display:flex;gap:8px;margin:0 0 14px}
+  .filtros button{flex:1;border:0;border-radius:10px;padding:10px 0;font-size:15px;font-weight:600;
+    background:var(--card);color:var(--txt)}
+  .filtros button.on{background:var(--btn);color:var(--btntxt)}
+  .card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px}
+  .top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .tag{font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--btn);color:var(--btntxt)}
+  .fecha{color:var(--hint);font-size:14px}
+  .ep{font-size:17px;font-weight:600;margin:2px 0 12px}
+  .acc{display:flex;gap:8px}
+  .acc button{border:0;border-radius:10px;padding:11px 14px;font-size:15px;font-weight:600;cursor:pointer}
+  .play{flex:1;background:var(--btn);color:var(--btntxt)}
+  .sec{background:var(--bg2);color:var(--link)}
+  iframe{width:100%;height:120px;border:0;border-radius:10px;margin-top:12px;display:block}
+</style>
+</head>
+<body>
+<h1>La Hora del Te</h1>
+<p class="sub" id="sub"></p>
+<div class="filtros">
+  <button data-f="todos" class="on">Todos</button>
+  <button data-f="LHT">LHT</button>
+  <button data-f="LHdD">LHdD</button>
+</div>
+<div id="lista"></div>
+<script>
+const PROGRAMAS = [{"url": "https://soundcloud.com/user-9862396/lhdd-5-octubre-2026-c", "show": "LHdD", "date": "2026-10-05", "fecha": "lunes 5 de octubre 2026", "ep": "Resumen de fin de semana", "msg": 2670}, {"url": "https://soundcloud.com/user-9862396/lht-2-octubre-2026-mi-mestizo", "show": "LHT", "date": "2026-10-02", "fecha": "viernes 2 de octubre 2026", "ep": "Mi mestizo y yo", "msg": 2669}, {"url": "https://soundcloud.com/user-9862396/lhdd-2-octubre-2026-los-perros", "show": "LHdD", "date": "2026-10-02", "fecha": "viernes 2 de octubre 2026", "ep": "Los perros según Fer", "msg": 2668}, {"url": "https://soundcloud.com/user-9862396/lht-1-octubre-2026-grandes", "show": "LHT", "date": "2026-10-01", "fecha": "jueves 1 de octubre 2026", "ep": "Grandes casualidades", "msg": 2667}, {"url": "https://soundcloud.com/user-9862396/lhdd-1-octubre-2026-tus-likes", "show": "LHdD", "date": "2026-10-01", "fecha": "jueves 1 de octubre 2026", "ep": "Tus likes", "msg": 2666}, {"url": "https://soundcloud.com/user-9862396/lht-30-septiembre-2026-cine", "show": "LHT", "date": "2026-09-30", "fecha": "miércoles 30 de septiembre 2026", "ep": "Cine erótico", "msg": 2660}, {"url": "https://soundcloud.com/user-9862396/lhdd-30-septiembre-2026", "show": "LHdD", "date": "2026-09-30", "fecha": "miércoles 30 de septiembre 2026", "ep": "Miércoles de concurso", "msg": 2659}, {"url": "https://soundcloud.com/user-9862396/lht-29-septiembre-2026-cua-nto", "show": "LHT", "date": "2026-09-29", "fecha": "martes 29 de septiembre 2026", "ep": "Cuánto dura un corto metraje?", "msg": 2658}, {"url": "https://soundcloud.com/user-9862396/lhdd-29-septiembre-2026", "show": "LHdD", "date": "2026-09-29", "fecha": "martes 29 de septiembre 2026", "ep": "Historia de asalto de Fer", "msg": 2657}, {"url": "https://soundcloud.com/user-9862396/lht-28-septiembre-2026-benin", "show": "LHT", "date": "2026-09-28", "fecha": "lunes 28 de septiembre 2026", "ep": "Benin -Argentina Messi", "msg": 2656}, {"url": "https://soundcloud.com/user-9862396/lhdd-28-septiembre-2026", "show": "LHdD", "date": "2026-09-28", "fecha": "lunes 28 de septiembre 2026", "ep": "Popurrí informativo", "msg": 2655}, {"url": "https://soundcloud.com/user-9862396/lht-25-septiembre-2026-tipos", "show": "LHT", "date": "2026-09-25", "fecha": "viernes 25 de septiembre 2026", "ep": "Tipos de Perros", "msg": 2654}, {"url": "https://soundcloud.com/user-9862396/lhdd-25-septiembre-2026-cursos", "show": "LHdD", "date": "2026-09-25", "fecha": "viernes 25 de septiembre 2026", "ep": "Cursos de hacer algo", "msg": 2653}, {"url": "https://soundcloud.com/user-9862396/lht-24-septiembre-2026-jueves", "show": "LHT", "date": "2026-09-24", "fecha": "jueves 24 de septiembre 2026", "ep": "Jueves emprendedores - Santiago en cabina", "msg": 2652}, {"url": "https://soundcloud.com/user-9862396/lhdd-24-septiembre-2026", "show": "LHdD", "date": "2026-09-24", "fecha": "jueves 24 de septiembre 2026", "ep": "Actitudes poisón y de amiguis en los cumpleaños", "msg": 2651}, {"url": "https://soundcloud.com/user-9862396/lht-23-septiembre-2026", "show": "LHT", "date": "2026-09-23", "fecha": "miércoles 23 de septiembre 2026", "ep": "Concurso de Miêrcoles", "msg": 2650}, {"url": "https://soundcloud.com/user-9862396/lhhd-23-septiembre-2026-mie", "show": "LHdD", "date": "2026-09-23", "fecha": "miércoles 23 de septiembre 2026", "ep": "Miércoles de concurso", "msg": 2649}, {"url": "https://soundcloud.com/user-9862396/lht-22-septiembre-2026-lht-en", "show": "LHT", "date": "2026-09-22", "fecha": "martes 22 de septiembre 2026", "ep": "LHT EN SUPERCOOP", "msg": 2648}, {"url": "https://soundcloud.com/user-9862396/lhdd-22-septiembre-2026-fer-y", "show": "LHdD", "date": "2026-09-22", "fecha": "martes 22 de septiembre 2026", "ep": "Fer y las fotos con Copán por AI", "msg": 2647}, {"url": "https://soundcloud.com/user-9862396/lht-21-septiembre-2026-gua", "show": "LHT", "date": "2026-09-21", "fecha": "lunes 21 de septiembre 2026", "ep": "Guárdenme una cría", "msg": 2646}, {"url": "https://soundcloud.com/user-9862396/lhdd-21-septiembre-2026", "show": "LHdD", "date": "2026-09-21", "fecha": "lunes 21 de septiembre 2026", "ep": "Resumen fin de semana", "msg": 2645}, {"url": "https://soundcloud.com/user-9862396/lht-17-septiembre-2026-jueves", "show": "LHT", "date": "2026-09-17", "fecha": "jueves 17 de septiembre 2026", "ep": "Jueves de emprendedor", "msg": 2644}, {"url": "https://soundcloud.com/user-9862396/lhdd-17-septiembre-2026-di-a", "show": "LHdD", "date": "2026-09-17", "fecha": "jueves 17 de septiembre 2026", "ep": "Día del Maestro", "msg": 2643}, {"url": "https://soundcloud.com/user-9862396/lht-16-septiembre-2026-el", "show": "LHT", "date": "2026-09-16", "fecha": "miércoles 16 de septiembre 2026", "ep": "El hondureño sobrevive al fin del mundo", "msg": 2642}, {"url": "https://soundcloud.com/user-9862396/lhdd-16-septiembre-2026", "show": "LHdD", "date": "2026-09-16", "fecha": "miércoles 16 de septiembre 2026", "ep": "Concurso de Miércoles", "msg": 2641}, {"url": "https://soundcloud.com/user-9862396/lht-11-septiembre-2026", "show": "LHT", "date": "2026-09-11", "fecha": "viernes 11 de septiembre 2026", "ep": "Recordando momentos del 9/11", "msg": 2640}, {"url": "https://soundcloud.com/user-9862396/lhdd-11-septiembre-2026", "show": "LHdD", "date": "2026-09-11", "fecha": "viernes 11 de septiembre 2026", "ep": "Viernes de bazar", "msg": 2639}, {"url": "https://soundcloud.com/user-9862396/lht-10-septiembre-2026-jueves", "show": "LHT", "date": "2026-09-10", "fecha": "jueves 10 de septiembre 2026", "ep": "Jueves de emprendedores", "msg": 2638}, {"url": "https://soundcloud.com/user-9862396/lhdd-10-septiembre-2026-sen", "show": "LHdD", "date": "2026-09-10", "fecha": "jueves 10 de septiembre 2026", "ep": "Señales que se la están aplicando", "msg": 2637}, {"url": "https://soundcloud.com/user-9862396/lht-9-septiembre-2026-chambas", "show": "LHT", "date": "2026-09-09", "fecha": "miércoles 9 de septiembre 2026", "ep": "Chambas difíciles en fiestas", "msg": 2636}, {"url": "https://soundcloud.com/user-9862396/lhdd-9-septiembre-2026", "show": "LHdD", "date": "2026-09-09", "fecha": "miércoles 9 de septiembre 2026", "ep": "Concurso de Miércoles", "msg": 2635}, {"url": "https://soundcloud.com/user-9862396/lht-8-septiembre-2026-luis", "show": "LHT", "date": "2026-09-08", "fecha": "martes 8 de septiembre 2026", "ep": "Luis Lara se rebela", "msg": 2634}, {"url": "https://soundcloud.com/user-9862396/lhdd-8-septiembre-2026-las", "show": "LHdD", "date": "2026-09-08", "fecha": "martes 8 de septiembre 2026", "ep": "Las mujeres de Estonia", "msg": 2633}, {"url": "https://soundcloud.com/user-9862396/lht-7-septiembre-2026-programa", "show": "LHT", "date": "2026-09-07", "fecha": "lunes 7 de septiembre 2026", "ep": "Programa sin luz", "msg": 2632}, {"url": "https://soundcloud.com/user-9862396/lhdd-7-septiembre-2026-resumen", "show": "LHdD", "date": "2026-09-07", "fecha": "lunes 7 de septiembre 2026", "ep": "Resumen de fin de semana", "msg": 2631}];
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+function abrir(url){ if (tg && tg.openLink) tg.openLink(url); else window.open(url, "_blank"); }
+function abrirTG(url){ if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, "_blank"); }
+function esc(s){ return s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+let filtro = "todos";
+function pintar(){
+  const lista = PROGRAMAS.filter(p => filtro === "todos" || p.show === filtro);
+  document.getElementById("sub").textContent = lista.length + " programas · el más nuevo primero";
+  document.getElementById("lista").innerHTML = lista.map((p, i) => `
+    <div class="card" id="c${i}">
+      <div class="top"><span class="tag">${p.show}</span><span class="fecha">${p.fecha}</span></div>
+      <div class="ep">${esc(p.ep || p.show)}</div>
+      <div class="acc">
+        <button class="play" data-i="${i}">▶ Escuchar</button>
+        <button class="sec" data-sc="${esc(p.url)}">SoundCloud</button>
+        <button class="sec" data-tg="https://t.me/lhtnooficial/${p.msg}">Canal</button>
+      </div>
+    </div>`).join("");
+  lista.forEach((p, i) => {
+    const card = document.getElementById("c" + i);
+    card.querySelector(".play").onclick = (e) => {
+      let f = card.querySelector("iframe");
+      if (f) { f.remove(); e.target.textContent = "▶ Escuchar"; return; }
+      document.querySelectorAll("iframe").forEach(x => { x.remove(); });
+      document.querySelectorAll(".play").forEach(b => b.textContent = "▶ Escuchar");
+      f = document.createElement("iframe");
+      f.allow = "autoplay";
+      f.src = "https://w.soundcloud.com/player/?url=" + encodeURIComponent(p.url) +
+              "&auto_play=true&visual=false&show_comments=false&show_teaser=false&color=%23" +
+              ((tg && tg.themeParams && tg.themeParams.button_color) || "#2481cc").replace("#","");
+      card.appendChild(f);
+      e.target.textContent = "■ Cerrar";
+    };
+    card.querySelector("[data-sc]").onclick = () => abrir(p.url);
+    card.querySelector("[data-tg]").onclick = () => abrirTG("https://t.me/lhtnooficial/" + p.msg);
+  });
+}
+document.querySelectorAll(".filtros button").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".filtros button").forEach(x => x.classList.remove("on"));
+  b.classList.add("on"); filtro = b.dataset.f; pintar();
+});
+pintar();
+</script>
+</body>
+</html>
